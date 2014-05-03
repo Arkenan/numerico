@@ -1,5 +1,4 @@
 #Empezamos con un polinomio de ejemplo. Luego se hará una entrada más general.
-
 function r = polinomio (coefs,x)
 	res = 0.0;
 	i = 0;
@@ -20,7 +19,7 @@ function raiz = biseccion(f,rango)
 	a = rango(1);
 	b = rango(2);
 	#comienzo con una cantidad arbitraria de iteraciones, luego hago algun criterio mejor.
-	for i = [1:15]
+	for i = [1:5]
 		m = (a + b)/2;
 		if (f(m)*f(a) < 0)
 			b = m;
@@ -35,7 +34,7 @@ function raiz = RegulaFalsi(f,rango)
 	a = rango(1);
 	b = rango(2);
 	#comienzo con una cantidad arbitraria de iteraciones, luego hago algun criterio mejor.
-	for i = [1:15]
+	for i = [1:5]
 		#esto es lo unico que cambia en RS. El punto medio se busca de otra forma.
 		m = a - f(a)*((b-a)/(f(b)-f(a)));
 		if (f(m)*f(a) < 0)
@@ -67,11 +66,20 @@ function pd = PolinomioDerivado(coefs)
 endfunction
 
 #
-function NewtonRaphson(f,fder,rango)
-	
+function pf = NewtonRaphson(f,df,seed)
+	x = seed;
+	for i  = 1:5
+		x = x - f(x)/df(x);
+	endfor
+	pf = x;
 endfunction
-fplot(PolinomioDerivado([3,0,1]),[-5,5])
-fplot(polEval([3,0,1]),[-5,5])
-#pol = polEval([-2,0,1]);
-#r = biseccion(pol,[0,10])
-#r = RegulaFalsi(pol,[0,10])
+
+pol = polEval([-2,0,1]);
+dpol = PolinomioDerivado([-2,0,1])
+
+#fplot(pol,[-5,5])
+#fplot(dpol,[-5,5])
+
+r = biseccion(pol,[0,10])
+r = RegulaFalsi(pol,[0,10])
+r = NewtonRaphson(pol,dpol,10)
