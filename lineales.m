@@ -1,7 +1,5 @@
 %La idea es pasarle una matriz ampliada (R^(n*(n+1))). Lo que devuelva cada metodo debe ser un vector de R^n, solucion del sistema. Por esto, para todos los métodos se supone un sistema representado por una matriz cuadrada.
 
-%A los iterativos se les pasa la cantidad de iteraciones. Despues sera una condicion de corte.
-
 %Directos. Se recibe matriz diagonal ampliada. Resolución de Lower (diagonal inferior).
 
 function x = despejarInferior(L)
@@ -25,27 +23,46 @@ endfunction
 
 %Con pivote parcial.
 function LU = factorizarLU(M)
-	%Eliminación de Gauss, pero aprovecha los inferiores para guardar los multiplicadores.
+	
 	n = rows(M);
-	for i = [2:n]
-		huboCambios = false;
-		%pivoteo parcial. Buscar forma de no intercambiar filas, sino guardar los cambios.
-		posMaximo = [i,i];
-		for j = [i, rows(M)]
-			if ( M(j,i) < m)
-				posMaximo %terminar
-			
+	allCols = [1:n+1];
+	i = 1;
+	
+	while (i <= n) && (!ld)
+		ld = false;
+		%Pivoteo parcial. OPT: Buscar forma de no intercambiar filas, sino guardar los cambios.
+		yMax = i; vmax = M(i,i);
+		
+		for j = [i,n]
+			if ( M(j,i) < yMax )
+				ymax = j;
+				vmax = m(j,i);
+			endif
 		endfor
 		
-		%eliminación
-		if ( M(i, i - 1) != 0 )
-			huboCambios  = true;
-			multiplicador  = M(i,i-1)/M(i-1,i-1);
-			%guardo multiplicador en la inferior.
-			M(i,i - 1) = multiplicador;
-			M(i,[i:n + 1]) -= M(i - 1,[i:n + 1]) * multiplicador;
+		%OPT: Habría que revisar de que la igualdad sea estricta o no.
+		ld = (vMax == 0);
+		
+		if (!ld)
+			%Intercambio de filas i,j por pivoteo.
+			aux = M(j,allCols);
+			M(j,allCols) = M(i,allCols);
+			M(i,allCols) = aux;
+			
+			%eliminación
+			for j = [i + 1: n]
+				if M(j,i) != 0
+					multiplicador  = M(j, i)/M(i,i);
+					%guardo multiplicador en la inferior.
+					M(j,i) = multiplicador;
+					M(j,[i + 1: n + 1]) -= M(i,[i + 1: n + 1]) * multiplicador;
+				endif
+			endfor
 		endif
-	endfor	
+		
+		i++;
+	endwhile	
+	
 endfunction
 
 function x = Gauss(M)
