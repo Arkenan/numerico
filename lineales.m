@@ -27,9 +27,9 @@ function LU = factorizarLU(M)
 	n = rows(M);
 	allCols = [1:n+1];
 	i = 1;
+	ld = false;
 	
 	while (i <= n) && (!ld)
-		ld = false;
 		%Pivoteo parcial. OPT: Buscar forma de no intercambiar filas, sino guardar los cambios.
 		yMax = i; vmax = M(i,i);
 		
@@ -75,3 +75,6 @@ despejarInferior(L);
 
 U = [1,2,3,4;0,1,2,3;0,0,1,2];
 despejarSuperior(U);
+
+M = [1,1,1,1;1,1,1,1;1,1,1,1];
+LU = factorizarLU(M)
