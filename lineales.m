@@ -10,6 +10,7 @@ function x = despejarInferior(L)
 		%Los b están incluidos en L. b(i) = L(i,end)
 		x(i) = (L(i,n + 1) - s)/L(i,i);
 	endfor
+	x = transpose(x);
 endfunction
 
 function x = despejarSuperior(U)
@@ -19,6 +20,7 @@ function x = despejarSuperior(U)
 		s = sum( U( i,[n:-1:i+1] ) .* x([n:-1:i+1]) );
 		x(i) = (U(i,n + 1) - s)/U(i,i);
 	endfor
+	x = transpose(x);
 endfunction
 
 %Con pivote parcial.
@@ -47,7 +49,6 @@ function LU = factorizarLU(M)
 			aux = M(j,allCols);
 			M(j,allCols) = M(i,allCols);
 			M(i,allCols) = aux;
-			
 			%eliminación
 			for j = [i + 1: n]
 				if M(j,i) != 0
@@ -58,7 +59,6 @@ function LU = factorizarLU(M)
 				endif
 			endfor
 		endif
-		
 		i++;
 	endwhile	
 	if (ld) 
@@ -78,5 +78,13 @@ despejarInferior(L);
 U = [1,2,3,4;0,1,2,3;0,0,1,2];
 despejarSuperior(U);
 
-M = [1,1,1,1;1,1,1,1;1,1,1,1];
+M = [1,20,3,4;5,6,7,8;9,10,11,12];
 LU = factorizarLU(M)
+
+printf ("Resultado por Gauss de este programa\n")
+X = Gauss(M)
+
+A = M([1:rows(M)],[1:columns(M)-1]);
+B = M([1:rows(M)],columns(M));
+printf ("Resultado de Octave\n")
+X = A\B
