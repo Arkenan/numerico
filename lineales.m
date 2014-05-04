@@ -23,7 +23,6 @@ endfunction
 
 %Con pivote parcial.
 function LU = factorizarLU(M)
-	
 	n = rows(M);
 	allCols = [1:n+1];
 	i = 1;
@@ -62,7 +61,10 @@ function LU = factorizarLU(M)
 		
 		i++;
 	endwhile	
-	
+	if (ld) 
+		printf("es linealmente dependiente")
+	endif
+	LU = M;
 endfunction
 
 function x = Gauss(M)
