@@ -1,1 +1,5 @@
-Read me.
+Metodos de Resolución de sistemas de ecuaciones
+
+lineales.m: factorización LU. Gauss.
+
+noLineales.m: Bisección. Regula Falsi. Newton-Raphson.
