@@ -31,12 +31,12 @@ function LU = factorizarLU(M)
 	
 	while (i <= n) && (!ld)
 		%Pivoteo parcial. OPT: Buscar forma de no intercambiar filas, sino guardar los cambios.
-		yMax = i; vmax = M(i,i);
+		yMax = i; vMax = M(i,i);
 		
 		for j = [i,n]
 			if ( M(j,i) < yMax )
-				ymax = j;
-				vmax = m(j,i);
+				yMax = j;
+				vMax = M(j,i);
 			endif
 		endfor
 		
