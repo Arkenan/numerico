@@ -1,7 +1,9 @@
 %Represento la matriz por 3 vectores. Uno para la diagonal central, otra para la primera supradiagonal, y otra para las E. Las inferiores salen por simetría, no hace falta guardarlas.
 
 RTOL = 0.0001;
-n = 6;
+n = 9;
+%Se muestran 3 decimales.
+output_max_field_width(3);
 
 function [D1,D2,D3] = construirDiagonales(n)
 	if (n<6)
@@ -122,21 +124,27 @@ semilla = repmat(1,n,1);
 m = construirMatriz(D1,D2,D3);
 xPC = m\b;
 
-printf("")
+printf("Resultado por Jacobi:\n");
+disp(xJacobi);
+
+printf("Resultado por Gauss-Seidel:\n");
+disp(xGS);
+
+printf("Resultado de Octave:\n");
+disp(xPC);
 
 %Calculo de Radios espectrales.
-puntosJacobi = [1:iteracionesJacobi]
-rEspectralJacobi = e^(polyfit(puntosJacobi,diferenciasJacobi,1)(1))
+puntosJacobi = [1:iteracionesJacobi];
+rEspectralJacobi = e^(polyfit(puntosJacobi,log(diferenciasJacobi),1)(1))
 
-puntosGS = [1:iteracionesGS]
-rEspectralGS =  e^(polyfit(puntosGS,diferenciasGS,1)(1))
+puntosGS = [1:iteracionesGS];
+rEspectralGS =  e^(polyfit(puntosGS,log(diferenciasGS),1)(1))
 
 %Parte grafica.
 figure(1)
 plot(puntosJacobi, log(diferenciasJacobi),puntosGS,log(diferenciasGS));
 title('diferencias en funcion de las iteraciones');
-xlabel('Numero de Iteracion','Color','r');
-%ylabel('ln( ||x^k - x || \infty )');
+xlabel('Numero de Iteracion');
 ylabel('Logaritmo de la norma infinito de la diferencia')
 legend('Jacobi','Gauss-Seidel');
 print -dpng 'grafico.png'
