@@ -1,9 +1,11 @@
-%Represento la matriz por 3 vectores. Uno para la diagonal central, otra para la primera supradiagonal, y otra para las E. Las inferiores salen por simetría, no hace falta guardarlas.
-
+clear;
 RTOL = 0.0001;
-n = 9;
+%listaDimensiones = [6,18,24,30];
+listaDimensiones = [6,18,24,30];
 %Se muestran 3 decimales.
-output_max_field_width(3);
+output_max_field_width(4);
+
+%Represento la matriz por 3 vectores. Uno para la diagonal central, otra para la primera supradiagonal, y otra para las E. Las inferiores salen por simetría, no hace falta guardarlas.
 
 function [D1,D2,D3] = construirDiagonales(n)
 	if (n<6)
@@ -49,21 +51,20 @@ function s = suma(D2,D3, n, x)
 	s(n) = D2(n-1)*x(n-1) + D3(n-3)*x(n-3);
 endfunction
 
-function [x, iteraciones, diferencias] = jacobi(D1,D2,D3,b,semilla,RTOL)
+function [x, xk] = jacobi(D1,D2,D3,b,semilla,RTOL)
 	n = length(D1);
 	tolerable = false;
 	x = semilla;
-	iteraciones = 0;
+	k = 0;
 	while (!tolerable)
-		iteraciones++;
+		k++;
 		%s es suma productos en cada fila.
 		s  = suma(D2,D3,n,x);
 		for i = [1:n]
 			xNuevo(i,1) = (1/D1(i))*(b(i)-s(i));
 		endfor;
-		diferencia = max(abs(xNuevo-x));
-		diferencias(iteraciones) = diferencia;
-		tolerable =  diferencia/(max(abs(xNuevo))) < RTOL;
+		xk{k} = xNuevo;
+		tolerable =  max(abs(xNuevo-x))/(max(abs(xNuevo))) < RTOL;
 		x = xNuevo;
 	endwhile
 endfunction
@@ -88,17 +89,16 @@ function xNuevo = sumaGS(D1,D2,D3,b,x)
 	xNuevo(n,1) = (1/D1(n))*(b(n)-s);
 endfunction
 
-function [x, iteraciones, diferencias] = GS(D1,D2,D3,b,semilla,RTOL)
+function [x, xk] = GS(D1,D2,D3,b,semilla,RTOL)
 	n = length(D1);
 	tolerable = false;
 	x = semilla;
-	iteraciones = 0;
+	k = 0;
 	while (!tolerable)
-		iteraciones++;
+		k++;
 		xNuevo = sumaGS(D1,D2,D3,b,x);
-		diferencia = max(abs(xNuevo-x));
-		diferencias(iteraciones) = diferencia;
-		tolerable =  diferencia/(max(abs(xNuevo))) < RTOL;
+		xk{k} = xNuevo;
+		tolerable =  max(abs(xNuevo-x))/(max(abs(xNuevo))) < RTOL;
 		x = xNuevo;
 	endwhile
 endfunction
@@ -113,39 +113,75 @@ function b = construirB(D1,D2,D3)
 	endfor;
 endfunction
 
-%Construcciones previas
-[D1,D2,D3]= construirDiagonales(n);
-b = construirB(D1,D2,D3)
-semilla = repmat(1,n,1);
+exp = 0;
+for n = listaDimensiones
+	exp++;
+	printf("**** DIMENSION %i ****\n\n",n);
+	%Construcciones previas
+	printf("Se obtiene el vector x a partir del padron y b a partir de este\n");
+	x = repmat([8;8;1],n/3,1);
+	
+	[D1,D2,D3]= construirDiagonales(n);
+	
+	b = construirB(D1,D2,D3);
+	printf ("x               b\n");
+	for indice = [1:n]
+		printf("%i            %.4f\n", x(indice),b(indice));
+	endfor
+	
+	semilla = repmat(1,n,1);
+	
+	%Resolución del sistema con cada método.
+	tic
+		[xJacobi, xkJacobi] = jacobi(D1,D2,D3,b,semilla,RTOL);
+	tJacobi = toc;
+	tic
+		[xGS, xkGS] = GS(D1,D2,D3,b,semilla,RTOL);
+	tGS = toc;
+	
+	m = construirMatriz(D1,D2,D3);
+		xPC = m\b;
+	printf("\nResultados para cada metodo\n");
+	printf("Jacobi            GS            Octave\n");
+	for indice = [1:n]
+		printf("%.4f          %.4f          %.4f\n",xJacobi(indice),xGS(indice),xPC(indice));
+	endfor
+	
+	printf("\nIteraciones\n  %i              %i",length(xkJacobi),length(xkGS));
+	printf("\nTiempo\n%.4f          %.4f\n",tJacobi,tGS);
+	
+	
+	%Calculo de Radios espectrales.
+	
+	puntosJacobi = [1:length(xkJacobi)];
+	for i = puntosJacobi
+		diferenciasJacobi(i) = log(max(abs(xkJacobi{i}-x)));
+	endfor
+	rEspectralJacobi(exp) = e^(polyfit(puntosJacobi,diferenciasJacobi,1)(1));
+	
+	printf("\n\nEl radio espectral de Jacobi para la dimension %i es %.3f.\n",n,rEspectralJacobi(exp));
+	puntosGS = [1:length(xkGS)];
+	for i = puntosGS
+		diferenciasGS(i) = log(max(abs(xkGS{i}-x)));
+	endfor
+	rEspectralGS(exp) =  e^(polyfit(puntosGS,diferenciasGS,1)(1));
+	printf("El radio espectral de Gauss-Seidel para la dimension %i es %.3f.\n\n",n,rEspectralGS(exp));
+	
+	%Parte grafica.
+	figure(1);
+	plot(puntosJacobi, diferenciasJacobi,puntosGS,diferenciasGS);
+	title('diferencias en funcion de las iteraciones');
+	set(gca,'XTick',[[1:5:50],[length(puntosJacobi) length(puntosGS)]]);
+	xlabel('Numero de Iteracion');
+	xlim([0 50]);
+	ylabel('Logaritmo de la norma infinito de la diferencia');
+	legend('Jacobi','Gauss-Seidel');
+	fName = sprintf("grafico%i.png",n);
+	print ('-dpng', fName);
 
-%Resolución del sistema con cada método.
-[xJacobi, iteracionesJacobi, diferenciasJacobi] = jacobi(D1,D2,D3,b,semilla,RTOL);
-[xGS, iteracionesGS, diferenciasGS] = GS(D1,D2,D3,b,semilla,RTOL);
-m = construirMatriz(D1,D2,D3);
-xPC = m\b;
+endfor;
 
-printf("Resultado por Jacobi:\n");
-disp(xJacobi);
+plot(listaDimensiones,rEspectralJacobi,listaDimensiones,rEspectralGS);
 
-printf("Resultado por Gauss-Seidel:\n");
-disp(xGS);
 
-printf("Resultado de Octave:\n");
-disp(xPC);
-
-%Calculo de Radios espectrales.
-puntosJacobi = [1:iteracionesJacobi];
-rEspectralJacobi = e^(polyfit(puntosJacobi,log(diferenciasJacobi),1)(1))
-
-puntosGS = [1:iteracionesGS];
-rEspectralGS =  e^(polyfit(puntosGS,log(diferenciasGS),1)(1))
-
-%Parte grafica.
-figure(1)
-plot(puntosJacobi, log(diferenciasJacobi),puntosGS,log(diferenciasGS));
-title('diferencias en funcion de las iteraciones');
-xlabel('Numero de Iteracion');
-ylabel('Logaritmo de la norma infinito de la diferencia')
-legend('Jacobi','Gauss-Seidel');
-print -dpng 'grafico.png'
 printf("FIN")
