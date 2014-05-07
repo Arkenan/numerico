@@ -1,8 +1,75 @@
 \documentclass{article}
+\usepackage{mathtools}
+\usepackage[]{mcode}
+
 \begin{document}
-	5+5
-	
+	$
+	\begin{pmatrix*}[l]
+		D1(1) & D2(1) & 0 & D3(1) & 0 & 0 \\
+		D2(1) & D1(2) & D2(2) & 0 & D3(2) & 0 \\
+		0 & D2(2) & D1(3) & D2(3) & 0 & D3(3)\\
+		D3(1) & 0 & D2(3) & D1(4) & D2(4) & 0 \\
+		0 & D3(2) & 0 & D2(4) & D1(5) & D2(5) \\
+		0 & 0 & D3(3) & 0 & D2(5) & D1(6)
+	\end{pmatrix*}
 	$
 	
+	$
+	x_i^{(k+1)} = 
+	\frac{1}{D1_i}(b_i-s_i)
+	$
+	
+	$ 
+	s_1 = D2_1x^{(k)}_2 + D3_1x_4^{(k)}
+	$
+	
+	$
+	s_i =  D2_ix^{(k)}_{i+1} + D2_{i-1}x^{(k)}_{i-1} + D3_ix^{(k)}_{i+3} \text{ } 
+	 (i\in\{2,3\})
+	$ 
+	
+	$ 
+	s_i = D2_ix^{(k)}_{i+1} + D2_{i-1}x^{(k)}_{i-1} + D3_ix^{(k)}_{i+3} + D3_{i-3}x_{i-3}^{(k)} \text{ } 
+		 (4 \leq i \leq n-3)
+	$
+	
+	$ 
+	s_i = D2_ix^{(k)}_{i+1} + D2_{i-1}x^{(k)}_{i-1} + D3_{i-3}x^{(k)}_{i-3} \text{ } 
+	 (i \in\{n-2,n-1\})
+	$
+	
+	$
+	s_n = D2_{n-1}x^{(k)}_{n-1} + D3_{n-3}x^{(k)}_{n-3}
+	$
+	
+	$
+	\frac{\parallel x^{(k+1)} - x^{(k)} \parallel _\infty}{\parallel x^{(k+1)} \parallel _\infty} \leq 0.0001
+	$	
+
+	$ 
+	s_1 = D2_1x^{(k)}_2 + D3_1x_4^{(k)}
+	$
+	
+	$
+	s_i =  D2_ix^{(k)}_{i+1} + D2_{i-1}x^{(k+1)}_{i-1} + D3_ix^{(k)}_{i+3} \text{ } 
+ (i\in\{2,3\})
+	$ 
+	
+	$ 
+	s_i = D2_ix^{(k)}_{i+1} + D2_{i-1}x^{(k+1)}_{i-1} + D3_ix^{(k)}_{i+3} + D3_{i-3}x_{i-3}^{(k+1)} \text{ } 
+	 (4 \leq i \leq n-3)
+	$
+	
+	$ 
+	s_i = D2_ix^{(k)}_{i+1} + D2_{i-1}x^{(k+1)}_{i-1} + D3_{i-3}x^{(k+1)}_{i-3} \text{ } 
+	 (i \in\{n-2,n-1\})
+	$
+	
+	$
+	s_n = D2_{n-1}x^{(k+1)}_{n-1} + D3_{n-3}x^{(k+1)}_{n-3}
+	$
+	
+	$
+	\ln{\parallel x^{(k)} - x \parallel_\infty} = k\ln{\rho} + \ln{\parallel x^{(0)} - x \parallel_\infty}
 	$
 \end{document}
