@@ -1,6 +1,6 @@
-<b>Metodos de Resolución de sistemas de ecuaciones</b>
+<h1>Metodos de Resolución de sistemas de ecuaciones</h1>
 
-lineales.m: factorización LU. Gauss.
+<b>lineales.m</b>: factorización LU. Gauss.
 
 noLineales.m: Bisección. Regula Falsi. Newton-Raphson.
 
