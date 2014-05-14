@@ -134,10 +134,10 @@ for n = listaDimensiones
 	%Resolución del sistema con cada método.
 	tic
 		[xJacobi, xkJacobi] = jacobi(D1,D2,D3,b,semilla,RTOL);
-	tJacobi = toc;
+	tJacobi(exp) = toc;
 	tic
 		[xGS, xkGS] = GS(D1,D2,D3,b,semilla,RTOL);
-	tGS = toc;
+	tGS(exp) = toc;
 	
 	m = construirMatriz(D1,D2,D3);
 		xPC = m\b;
@@ -148,7 +148,7 @@ for n = listaDimensiones
 	endfor
 	
 	printf("\nIteraciones\n  %i              %i",length(xkJacobi),length(xkGS));
-	printf("\nTiempo\n%.4f          %.4f\n",tJacobi,tGS);
+	printf("\nTiempo\n%.4f          %.4f\n",tJacobi(exp),tGS(exp));
 	
 	
 	%Calculo de Radios espectrales.
@@ -170,7 +170,8 @@ for n = listaDimensiones
 	%Parte grafica.
 	figure(1);
 	plot(puntosJacobi, diferenciasJacobi,puntosGS,diferenciasGS);
-	title('diferencias en funcion de las iteraciones');
+	titulo = ["n = " num2str(n)];
+	title(titulo);
 	set(gca,'XTick',[[1:5:50],[length(puntosJacobi) length(puntosGS)]]);
 	xlabel('Numero de Iteracion');
 	xlim([0 50]);
@@ -181,7 +182,23 @@ for n = listaDimensiones
 
 endfor;
 
+%Grafico de radios espectrales.
 plot(listaDimensiones,rEspectralJacobi,listaDimensiones,rEspectralGS);
+titulo = ["n = " strrep(num2str(listaDimensiones),'   ',',')];
+title(titulo);
+xlabel('Dimension de la matriz del sistema');
+ylabel('Radios espectrales para cada metodo');
+legend('Jacobi','Gauss-Seidel');
+print('-dpng',"rEspectral.png");
 
+%Grafico de tiempos
+
+plot(listaDimensiones,tJacobi,listaDimensiones,tGS);
+titulo = ["n = " strrep(num2str(listaDimensiones),'   ',',')];
+title(titulo);
+xlabel('Dimension de la matriz del sistema');
+ylabel('tiempo tardado por cada metodo.');
+legend('Jacobi','Gauss-Seidel');
+print('-dpng',"tiempos.png");
 
 printf("FIN")
