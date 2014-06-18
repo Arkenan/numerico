@@ -1,0 +1,50 @@
+\documentclass{article}
+\usepackage{mathtools}
+
+\begin{document}
+
+$
+r \frac{d^{2}T}{dr^{2}} + \frac{dT}{dr} = 0
+$
+
+
+$
+\frac{dT}{dr} = v(r)
+$
+
+$
+\frac{dv}{dr} = -\frac{v(r)}{r}
+$
+
+$
+v_{i+1} = v_i + hf(v_i,r_i) = v_i + h(-\frac{v_i}{r_i})
+$
+
+$
+v_{i+\frac{2}{3}} = v_i + \frac{2}{3}hf(v_i,r_i) = v_i + \frac{2}{3}hf(-\frac{v_i}{r_i})
+$
+
+$
+v_{i+1} = v_i + \frac{h}{4}[f(v_i,r_i) + 3f(v_{i+\frac{2}{3}},r_{i+\frac{2}{3}})] = v_i + \frac{h}{4}[-\frac{v_i}{r_i} + 3(-\frac{v_{i+\frac{2}{3}}}{r_{i+\frac{2}{3}}})]
+$
+
+$
+T_{i+1} = T_i + hf(r_i) = T_i + hv_i
+$
+
+$
+T_{i+1} = T_i + \frac{h}{2}[f(r_i) + f(r_{i+1})] = T_i + \frac{h}{2}(v_i + v_{i+1})
+$
+
+$
+\frac{dT_1}{dr}=-\frac{1}{r}\frac{dT_1}{dr} ,\quad T_1(r_{int})=T_{int} ,\quad \frac{dT_1}{dr}(r_{int}) = 0
+$
+
+$
+\frac{dT_2}{dr}=-\frac{1}{r}\frac{dT_2}{dr} ,\quad T_2(r_{int})=0 ,\quad \frac{dT_2}{dr}(r_{int}) = 1
+$
+
+$
+T(r) = T_1(r) + \frac{T_{ext}-T_1(r_{ext})}{T_2(r_{ext})}T_2(r)
+$
+\end{document}
