@@ -1,13 +1,15 @@
+%Arjovsky-94881-Tarela-18/6/2014
+
 clear();
 
 %Radio exterior: 244,475 milimetros. Radio interior: 219,075 milimetros. Espesor: 25,4 milimetros.
 global rExt = 244.47500;
 global rInt = 219.07500;
 %Paso inicial: 1 milimetro.
-paso = 10.0;
+paso = 1.0;
 %padron: 94881. 
-global TExt = 948.0/6.0;
-global TInt = 81.0;
+global TExt = 81.0;
+global TInt = 948.0/6.0;
 
 %Euler. f(y,t) es un function handler, h es el paso. t es un vector con la grilla de la variable independiente.
 function y = Euler (f, h, y0,t)
@@ -148,7 +150,7 @@ paso = (rExt-rInt)/2;
 pasos = [];
 erroresE = [];
 erroresRK = [];
-
+iteraciones = 0;
 for j=[1:10]
   %grilla discretizada de radios.
   r = [rInt:paso:rExt];
@@ -181,7 +183,7 @@ for j=[1:10]
   iteraciones += 1.0;
   
   pasos = [pasos paso];
-  paso = (rExt - rInt)/(2^(iteraciones+1));
+  paso = (rExt - rInt)/(2^(iteraciones));
   
   errorEuler = max(abs(TEuler - solAnaliticaDiscreta));
   erroresE = [erroresE errorEuler];
@@ -193,3 +195,10 @@ endfor
 erroresE
 erroresRK
 pasos
+
+function str = csv(vec)
+  str = num2str(vec(1));
+  for i = [2: columns(vec)]
+    str = [str,' ', num2str(vec(i))];
+  endfor
+endfunction 
