@@ -5,8 +5,7 @@ clear();
 %Radio exterior: 244,475 milimetros. Radio interior: 219,075 milimetros. Espesor: 25,4 milimetros.
 global rExt = 244.47500;
 global rInt = 219.07500;
-%Paso inicial: 1 milimetro.
-paso = 1.0;
+
 %padron: 94881. 
 global TExt = 81.0;
 global TInt = 948.0/6.0;
@@ -71,11 +70,14 @@ dvdr = @(v,r) -v/r;
 iteraciones = 0;
 itEstimadas = 1;
 
+%Paso inicial: 1 milimetro.
+paso = (rExt-rInt)/3;
 pasos = [];
 erroresE = [];
 erroresRK = [];
 
 do
+  
   %grilla discretizada de radios.
   r = [rInt:paso:rExt];
   grillas{iteraciones + 1} = r;
@@ -132,13 +134,13 @@ until (errorMax < 0.02)
 
 erroresE
 erroresRK
-plot(pasos(2:end),erroresRK(2:end))
+plot(pasos,erroresRK)
 title('Error en Runge-Kutta segun el paso')
 xlabel('Paso (h)')
 ylabel('Error')
 print('-dpng',"errRK.png");
 
-plot(pasos(2:end),erroresE(2:end))
+plot(pasos,erroresE)
 title('Error en Euler segun el paso')
 xlabel('Paso (h)')
 ylabel('Error')
