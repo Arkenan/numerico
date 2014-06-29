@@ -2,7 +2,7 @@
 
 clear();
 
-%Radio exterior: 244,475 milimetros. Radio interior: 219,075 milimetros. Espesor: 25,4 milimetros.
+%Espesor: 25,4 milimetros.
 global rExt = 122.23750;
 global rInt = 96.83750;
 
@@ -185,6 +185,8 @@ for j=[1:10]
   erroresRK = [erroresRK errorRK];
   errorMax = max([errorEuler, errorRK]);
 endfor
+
+printf('\nValores para estimacion del orden:\n')
 
 erroresE
 erroresRK
