@@ -160,7 +160,7 @@ print('-dpng',"errE.png");
 pasos = [];
 erroresE = [];
 erroresRK = [];
-for j=[1:10]
+for j=[1:15]
   %Para el orden lo resuelvo otra vez pero reduciendo el paso a la mitad cada vez.
   paso = (rExt - rInt)/(2^j);
   
