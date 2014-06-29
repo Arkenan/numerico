@@ -3,8 +3,8 @@
 clear();
 
 %Radio exterior: 244,475 milimetros. Radio interior: 219,075 milimetros. Espesor: 25,4 milimetros.
-global rExt = 244.47500;
-global rInt = 219.07500;
+global rExt = 122.23750;
+global rInt = 96.83750;
 
 %padron: 94881. 
 global TExt = 81.0;
@@ -28,6 +28,20 @@ function y = EulerDiscreto (f, h, y0,t)
   endfor
 endfunction
 
+%Esto se encarga de hacer los tiros y sacar una solucion aproximada.
+function ret = tirarEuler (dvdr,paso,grilla)
+  global TInt;
+  global TExt;
+  %Tiro1.
+  vEuler1 = Euler(dvdr, paso, 0.0, grilla);
+  TEuler1 = EulerDiscreto(vEuler1, paso, TInt, grilla);
+  %Tiro 2.
+  vEuler2 = Euler(dvdr, paso, 1.0, grilla);
+  TEuler2 = EulerDiscreto(vEuler2, paso, 0.0, grilla);
+  %Solucion aprox.
+  ret = TEuler1 + (TExt-TEuler1(end))/(TEuler2(end))*TEuler2;
+endfunction
+
 %RK2
 function y = Heun (f,h,y0,t)
   y(1) = y0;
@@ -49,6 +63,19 @@ function y = EulerMod (f,h,y0,t)
   endfor
 endfunction
 
+function ret = tirarRK(dvdr,paso,grilla)
+  global TInt;
+  global TExt;
+  %Tiro1.
+  vRK1 = Heun(dvdr, paso, 0.0, grilla);
+  TRK1 = EulerMod(vRK1, paso, TInt, grilla);
+  %Tiro2.
+  vRK2 = Heun(dvdr, paso, 1.0, grilla);
+  TRK2 = EulerMod(vRK2, paso, 0.0, grilla);
+  %Solucion aprox.
+  ret = TRK1 + (TExt-TRK1(end))/(TRK2(end))*TRK2;
+endfunction;
+
 function T = solAnalitica(r)
   global TExt;
   global TInt;
@@ -57,61 +84,39 @@ function T = solAnalitica(r)
   T = (TInt-TExt)*(log(rExt/r))/(log(rExt/rInt))+TExt;
 endfunction
 
-function dTdr = obtenerV(paso,v)
-  global rInt;
-  indice = (r- rInt)/paso
-  dTdr = @(T,r) v(indice);
-endfunction
-
-%funcion derivada de la velocidad de transmision de temperatura segun el radio.
+%Funcion derivada de la velocidad de transmision de temperatura segun el radio.
 dvdr = @(v,r) -v/r;
 
 %Se inician diferente las iteraciones ya que las estimadas dejan de contar antes.
 iteraciones = 0;
 itEstimadas = 1;
 
-%Paso inicial: 1 milimetro.
-paso = (rExt-rInt)/3;
+%Cantidad de partes a dividir para paso inicial cercano a 1 milimetro.
+partes = ceil(rExt-rInt);
+
 pasos = [];
 erroresE = [];
 erroresRK = [];
 
 do
+  paso = (rExt - rInt)/partes;
+  pasos = [pasos paso];
   
   %grilla discretizada de radios.
   r = [rInt:paso:rExt];
   grillas{iteraciones + 1} = r;
-  %Euler. 
-
-  %Tiro1.
-  vEuler1 = Euler(dvdr, paso, 0.0, r);
-  TEuler1 = EulerDiscreto(vEuler1, paso, TInt, r);
-  %Tiro 2.
-  vEuler2 = Euler(dvdr, paso, 1.0, r);
-  TEuler2 = EulerDiscreto(vEuler2, paso, 0.0, r);
-  %Solucion aprox.
-  TEuler = TEuler1 + (TExt-TEuler1(end))/(TEuler2(end))*TEuler2;
-  TEs{iteraciones + 1} = TEuler;
+  
+  %Euler.
+  TEuler = tirarEuler(dvdr, paso, r);
+  
   %Runge-Kutta. 
-
-  %Tiro1.
-  vRK1 = Heun(dvdr, paso, 0.0, r);
-  TRK1 = EulerMod(vRK1, paso, TInt, r);
-  %Tiro2.
-  vRK2 = Heun(dvdr, paso, 1.0, r);
-  TRK2 = EulerMod(vRK2, paso, 0.0, r);
-  %Solucion aprox.
-  TRK = TRK1 + (TExt-TRK1(end))/(TRK2(end))*TRK2;
-  TRKs{iteraciones + 1} = TRK;
+  TRK = tirarRK(dvdr,paso,r);
+  
   solAnaliticaDiscreta = [0];
   for i = [1: columns(r)]
     solAnaliticaDiscreta(i) = solAnalitica(r(i));
   endfor
   
-  iteraciones += 1.0;
-  pasos = [pasos paso];
-  printf('\nPaso: %.5f\n',paso)
-  paso = (rExt - rInt)/(iteraciones+4);
   errorEstimado = max(abs(TEuler - TRK));
   if (errorEstimado > 0.02)
     itEstimadas += 1;
@@ -123,17 +128,22 @@ do
   errorMax = max([errorEuler, errorRK]);
   
   %Output.
-  
-  printf ('Grilla     T(Euler)    T(RK)      T(Analitico) \n')
+  printf('\nPaso: %.5f\n',paso);
+  printf ('Grilla     T(Euler)    T(RK)      T(Analitico) \n');
   for i = [1:columns(r)]
     printf('%.5f  %.5f   %.5f   %.5f\n', r(i),TEuler(i),TRK(i),solAnaliticaDiscreta(i));
   endfor
   printf('\nError(Euler) Error(RK) Error estimado\n');
   printf('%.5f       %.5f     %.5f\n\n',errorEuler,errorRK,errorEstimado);
+  
+  partes += 1;
+  iteraciones += 1.0;
 until (errorMax < 0.02)
 
+pasos
 erroresE
 erroresRK
+
 plot(pasos,erroresRK)
 title('Error en Runge-Kutta segun el paso')
 xlabel('Paso (h)')
@@ -146,46 +156,28 @@ xlabel('Paso (h)')
 ylabel('Error')
 print('-dpng',"errE.png");
 
-%Para el orden lo resuelvo otra vez pero reduciendo el paso a la mitad cada vez.
-paso = (rExt-rInt)/2;
-
+%Estimativo del orden.
 pasos = [];
 erroresE = [];
 erroresRK = [];
-iteraciones = 0;
 for j=[1:10]
+  %Para el orden lo resuelvo otra vez pero reduciendo el paso a la mitad cada vez.
+  paso = (rExt - rInt)/(2^j);
+  
   %grilla discretizada de radios.
   r = [rInt:paso:rExt];
   
   %Euler. 
-
-  %Tiro1.
-  vEuler1 = Euler(dvdr, paso, 0.0, r);
-  TEuler1 = EulerDiscreto(vEuler1, paso, TInt, r);
-  %Tiro 2.
-  vEuler2 = Euler(dvdr, paso, 1.0, r);
-  TEuler2 = EulerDiscreto(vEuler2, paso, 0.0, r);
-  %Solucion aprox.
-  TEuler = TEuler1 + (TExt-TEuler1(end))/(TEuler2(end))*TEuler2;
+  TEuler = tirarEuler(dvdr,paso,r);  
   %Runge-Kutta. 
-
-  %Tiro1.
-  vRK1 = Heun(dvdr, paso, 0.0, r);
-  TRK1 = EulerMod(vRK1, paso, TInt, r);
-  %Tiro2.
-  vRK2 = Heun(dvdr, paso, 1.0, r);
-  TRK2 = EulerMod(vRK2, paso, 0.0, r);
-  %Solucion aprox.
-  TRK = TRK1 + (TExt-TRK1(end))/(TRK2(end))*TRK2;
+  TRK = tirarRK(dvdr,paso,r);
+  
   solAnaliticaDiscreta = [0];
   for i = [1: columns(r)]
     solAnaliticaDiscreta(i) = solAnalitica(r(i));
   endfor
   
-  iteraciones += 1.0;
-  
   pasos = [pasos paso];
-  paso = (rExt - rInt)/(2^(iteraciones));
   
   errorEuler = max(abs(TEuler - solAnaliticaDiscreta));
   erroresE = [erroresE errorEuler];
@@ -197,10 +189,3 @@ endfor
 erroresE
 erroresRK
 pasos
-
-function str = csv(vec)
-  str = num2str(vec(1));
-  for i = [2: columns(vec)]
-    str = [str,' ', num2str(vec(i))];
-  endfor
-endfunction 
